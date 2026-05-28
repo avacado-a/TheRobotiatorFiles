@@ -12,6 +12,7 @@ def init_db():
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
+        nickname TEXT,
         pin TEXT NOT NULL,
         role TEXT DEFAULT 'student',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -37,18 +38,20 @@ def init_db():
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
         year INTEGER,
         season TEXT,
+        method TEXT, -- 'PIN' or 'Face'
         capture_path TEXT,
         FOREIGN KEY (user_id) REFERENCES users (id)
     )
     ''')
 
-    # Active Sessions (to track who is currently here)
+    # Active Sessions
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS active_sessions (
         user_id INTEGER PRIMARY KEY,
         login_time DATETIME DEFAULT CURRENT_TIMESTAMP,
         season TEXT,
         year INTEGER,
+        last_facial_check DATETIME,
         FOREIGN KEY (user_id) REFERENCES users (id)
     )
     ''')
@@ -86,8 +89,10 @@ def init_db():
 
     # Default Config
     cursor.execute("INSERT OR IGNORE INTO system_config (key, value) VALUES ('current_season', 'Offseason')")
-    cursor.execute("INSERT OR IGNORE INTO system_config (key, value) VALUES ('current_year', '2025')")
-    cursor.execute("INSERT OR IGNORE INTO system_config (key, value) VALUES ('admin_password', 'robotiators2025')")
+    cursor.execute("INSERT OR IGNORE INTO system_config (key, value) VALUES ('current_year', '2026')")
+    cursor.execute("INSERT OR IGNORE INTO system_config (key, value) VALUES ('admin_password', 'RobotiatorFiles888')")
+    cursor.execute("INSERT OR IGNORE INTO system_config (key, value) VALUES ('offseason_goal', '888')")
+    cursor.execute("INSERT OR IGNORE INTO system_config (key, value) VALUES ('season_goal', '5000')")
 
     conn.commit()
     conn.close()

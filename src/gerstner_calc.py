@@ -1,41 +1,36 @@
 import sqlite3
 from datetime import datetime, timedelta
+import sys
+import os
+
+sys.path.append(os.getcwd())
+from src.attendance_logic import write_plaintext_log
 
 def calculate_gerstner_time():
-    """
-    Mr. Gerstner's time starts when the first person logs in and ends when the last person logs out.
-    We process this daily to keep his logs up to date.
-    """
     conn = sqlite3.connect("data/attendance.db")
     cursor = conn.cursor()
 
-    # Get all logs from the previous day that haven't been processed for Gerstner
-    # This is a bit complex for a stateless script, so we'll simplify:
-    # We find all login/logout events and calculate 'union' of time intervals.
+    # Process for "yesterday"
+    yesterday_dt = datetime.now() - timedelta(days=1)
+    yesterday = yesterday_dt.strftime("%Y-%m-%d")
 
-    # Logic:
-    # 1. Get all attendance logs for 'yesterday'
-    # 2. Sort by timestamp
-    # 3. Use a counter: +1 for login, -1 for logout
-    # 4. Timer starts when counter goes 0 -> 1
-    # 5. Timer stops when counter goes 1 -> 0
-    # 6. Sum these intervals.
-
-    yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
     cursor.execute("SELECT timestamp, type, year, season FROM attendance_logs WHERE timestamp LIKE ? ORDER BY timestamp", (f"{yesterday}%",))
     logs = cursor.fetchall()
+
+    if not logs:
+        conn.close()
+        return
 
     total_seconds = 0
     start_time = None
     count = 0
 
-    current_year = 2025
-    current_season = "Offseason"
+    year = 2026
+    season = "Offseason"
 
     for ts_str, action, yr, seas in logs:
         ts = datetime.strptime(ts_str, "%Y-%m-%d %H:%M:%S")
-        current_year = yr
-        current_season = seas
+        year, season = yr, seas
 
         if action == 'login':
             if count == 0:
@@ -48,9 +43,13 @@ def calculate_gerstner_time():
                 total_seconds += duration
                 start_time = None
 
+    # If someone was still logged in at end of day, they were caught by midnight cleanup
+    # which is already in the logs as 'logout'.
+
     if total_seconds > 0:
         cursor.execute("INSERT INTO gerstner_logs (start_time, end_time, duration_seconds, year, season) VALUES (?, ?, ?, ?, ?)",
-                       (f"{yesterday} 00:00:00", f"{yesterday} 23:59:59", int(total_seconds), current_year, current_season))
+                       (f"{yesterday} 00:00:00", f"{yesterday} 23:59:59", int(total_seconds), year, season))
+        write_plaintext_log(f"GERSTNER LOG: {yesterday} | Duration: {round(total_seconds/3600, 2)} hours")
 
     conn.commit()
     conn.close()

@@ -1,23 +1,18 @@
 import face_recognition
 import numpy as np
 import sqlite3
+from datetime import datetime, timedelta
 
 def get_db_connection():
     return sqlite3.connect("data/attendance.db")
 
 def encode_face(image_np):
-    """
-    Encodes a face from an image. Returns the encoding or None.
-    """
     encodings = face_recognition.face_encodings(image_np)
     if len(encodings) == 0:
         return None
     return encodings[0]
 
 def save_encodings(user_id, encodings_list):
-    """
-    Saves a list of numpy encodings for a specific user to the database.
-    """
     conn = get_db_connection()
     cursor = conn.cursor()
     for enc in encodings_list:
@@ -26,14 +21,29 @@ def save_encodings(user_id, encodings_list):
     conn.commit()
     conn.close()
 
-def identify_face(image_np, tolerance=0.5):
+def identify_face(image_np, tolerance=0.45):
     """
-    Identifies a face from an image by comparing it with known encodings in the database.
-    Returns user_id if found, else None.
+    Identifies the BIGGEST face in view, with a 10-minute cooldown per user.
     """
-    unknown_encodings = face_recognition.face_encodings(image_np)
-    if len(unknown_encodings) == 0:
+    face_locations = face_recognition.face_locations(image_np)
+    if not face_locations:
         return None, "No face detected"
+
+    # Find the biggest face (by area)
+    # location is (top, right, bottom, left)
+    biggest_face_idx = 0
+    max_area = 0
+    for i, (top, right, bottom, left) in enumerate(face_locations):
+        area = (bottom - top) * (right - left)
+        if area > max_area:
+            max_area = area
+            biggest_face_idx = i
+
+    biggest_face_location = face_locations[biggest_face_idx]
+    unknown_encodings = face_recognition.face_encodings(image_np, [biggest_face_location])
+
+    if not unknown_encodings:
+        return None, "Encoding failed"
 
     unknown_encoding = unknown_encodings[0]
 
@@ -41,10 +51,10 @@ def identify_face(image_np, tolerance=0.5):
     cursor = conn.cursor()
     cursor.execute("SELECT user_id, encoding FROM facial_encodings")
     rows = cursor.fetchall()
-    conn.close()
 
     if not rows:
-        return None, "No registered faces in database"
+        conn.close()
+        return None, "No registered faces"
 
     known_encodings = []
     user_ids = []
@@ -55,10 +65,22 @@ def identify_face(image_np, tolerance=0.5):
     matches = face_recognition.compare_faces(known_encodings, unknown_encoding, tolerance=tolerance)
 
     if True in matches:
-        # Find all matches and use the one with smallest distance
         face_distances = face_recognition.face_distance(known_encodings, unknown_encoding)
         best_match_index = np.argmin(face_distances)
         if matches[best_match_index]:
-            return user_ids[best_match_index], "Match found"
+            uid = user_ids[best_match_index]
 
+            # Cooldown check: Last log for this user within 10 minutes
+            cursor.execute("SELECT timestamp FROM attendance_logs WHERE user_id = ? ORDER BY timestamp DESC LIMIT 1", (uid,))
+            last_log = cursor.fetchone()
+            if last_log:
+                last_ts = datetime.strptime(last_log[0], "%Y-%m-%d %H:%M:%S")
+                if datetime.now() - last_ts < timedelta(minutes=10):
+                    conn.close()
+                    return None, "Cooldown active"
+
+            conn.close()
+            return uid, "Match found"
+
+    conn.close()
     return None, "No match found"
