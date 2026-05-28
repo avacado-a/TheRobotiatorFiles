@@ -1,40 +1,88 @@
 import streamlit as st
-from pages.utils.CONFIG import LOGGED_IN_PATH
-from pages.utils.helpers import avoid_block_read
-# py -m streamlit run C:/Users/timmy/PycharmProjects/AttendanceVK2/Home.py
-if "logged_in" not in st.session_state:
-    st.session_state["logged_in"] = avoid_block_read(LOGGED_IN_PATH)
+import sqlite3
+import cv2
+import numpy as np
+from src.attendance_logic import get_active_users, get_system_config
+import os
+import socket
 
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "localhost"
 
-st.title("Guide")
-st.write("""
+st.set_page_config(page_title="The Robotiator Files", layout="wide", page_icon="🗿")
 
-`Admin` page is password protected. It contains PIN details, the raw attendance data, and the ability to upload that data to the cloud.
+# Load custom CSS
+with open("static/css/style.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-`Leaderboard` page contains the top 5 users with the most amount of hours. 
+# Define shared CSS classes
+st.markdown("""
+    <style>
+    .success-box {
+        padding: 10px;
+        border-radius: 10px;
+        background-color: rgba(46, 125, 50, 0.8);
+        color: white;
+        margin: 5px 0;
+        border: 1px solid #81c784;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-`Logging` page contains the punch in/punch out system. Put the PIN used to register in order to punch in/out.
+st.title("🗿 THE ROBOTIATOR FILES 🤖")
+st.subheader("🌴 Tropical Fortress HQ")
 
-`Registering` page allows users to register in the system using a PIN and a name. 
+# Hero Section
+col1, col2 = st.columns([2, 1])
 
-`Statistics` page contains statistics about the attendance in the system. 
+with col1:
+    st.image("https://img.icons8.com/color/144/robot-2.png", width=100) # Placeholder for logo
+    st.markdown("""
+    ### Welcome, Robotiator!
+    Ensure you log in/out at the **Logging** station.
+    The fortress is currently active.
+    """)
 
-""")
+with col2:
+    local_ip = get_local_ip()
+    st.info(f"📱 **Mobile Login**\n\nScan or visit:\n`http://{local_ip}:8501`")
+    st.info(f"🎥 **Live Feed**\n\nView Fortress Feed:\n`http://{local_ip}:5000/video_feed`")
 
-st.title("FAQ")
-st.write("""
+# Announcements
+st.sidebar.title("📡 Announcements")
+conn = sqlite3.connect("data/attendance.db")
+cursor = conn.cursor()
+cursor.execute("SELECT title, content, created_at FROM announcements ORDER BY created_at DESC LIMIT 5")
+announcements = cursor.fetchall()
+for ann in announcements:
+    with st.sidebar.expander(f"📢 {ann[0]}"):
+        st.write(ann[1])
+        st.caption(f"Posted: {ann[2]}")
 
-### How do I reset the system?
-Run init.py to reset all data in the system. Please only do this if necessary and the data being erased is backed up.
+# Who's Here Now
+st.markdown("---")
+st.header("📍 Current Personnel in Fortress")
+active_users = get_active_users()
+if active_users:
+    cols = st.columns(4)
+    for i, user in enumerate(active_users):
+        with cols[i % 4]:
+            st.markdown(f"""
+            <div class="success-box">
+                <b>👤 {user[1]}</b><br>
+                <small>In: {user[2][11:16]}</small>
+            </div>
+            """, unsafe_allow_html=True)
+else:
+    st.write("🍃 The fortress is quiet. No personnel detected.")
 
-### How do I register in the system?
-Go to the Registering page and type in your name and your desired PIN. You should be in the system now!
-
-### How do I upload data to Google drive?
-Go to the Admin page and type in the administrator password. Go to the "Upload Data to Cloud" section, and type in your email in the text box. Click Upload Data.
-
-### How do I reset my PIN?
-Ask a mentor or a member of the leadership team.
-
-
-""")
+st.markdown("---")
+st.caption("v2.0 | Built for the Robotiators | No maintenance required.")
+conn.close()
