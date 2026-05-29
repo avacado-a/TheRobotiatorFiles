@@ -1,40 +1,40 @@
 import streamlit as st
-from pages.utils.CONFIG import LOGGED_IN_PATH
-from pages.utils.helpers import avoid_block_read
-# py -m streamlit run C:/Users/timmy/PycharmProjects/AttendanceVK2/Home.py
-if "logged_in" not in st.session_state:
-    st.session_state["logged_in"] = avoid_block_read(LOGGED_IN_PATH)
+import sqlite3
+import pandas as pd
+from src.attendance_logic import get_db_connection, get_system_config
 
+st.set_page_config(page_title="Guide | Robotiator Files", layout="wide")
 
-st.title("Guide")
-st.write("""
+# Theme
+st.markdown("""
+    <style>
+    .stApp { background-color: #00251a; color: #e0f2f1; }
+    h1, h2 { color: #ffca28; text-shadow: 2px 2px #000; }
+    </style>
+    """, unsafe_allow_html=True)
 
-`Admin` page is password protected. It contains PIN details, the raw attendance data, and the ability to upload that data to the cloud.
+st.title("🗿 The Robotiator Files")
+st.subheader("🌴 Tropical Fortress Operations Guide")
 
-`Leaderboard` page contains the top 5 users with the most amount of hours. 
+st.markdown("""
+### 🏗️ Mission Control
+Welcome to the overhaul of the Robotiators Attendance System. This station is built to last and requires zero maintenance.
 
-`Logging` page contains the punch in/punch out system. Put the PIN used to register in order to punch in/out.
+### 🔑 How to Access the Fortress
+1. **Registration**: Go to the `Registering` page. Enter your full name and a PIN (4+ digits). You can optionally scan your face 5 times to enable biometrics.
+2. **Logging**:
+   - **PIN**: The primary way to log in/out. Enter your PIN and click the button.
+   - **Biometrics**: If you registered your face, look at the camera for 1-3 seconds. The system detects the closest person.
+3. **Kiosk**: The main monitor displays real-time hours and the leaderboard. It auto-refreshes when personnel enter or leave.
 
-`Registering` page allows users to register in the system using a PIN and a name. 
+### 📊 Intelligence Tracking
+- **Leaderboard**: See who has the most hours in the current season.
+- **Statistics**: View the total progress towards the seasonal goal (5000 hours in Season, 888 in Offseason).
+- **Admin**: For command override. Use PIN `RobotiatorFiles888`.
 
-`Statistics` page contains statistics about the attendance in the system. 
-
+### 🛡️ System Robustness
+- **Auto-Logout**: If you forget to log out, the system automatically logs you out at midnight and gives you exactly 30 minutes from your login time.
+- **Backups**: Every event is logged in a plaintext file and the database. Data is easily exportable to USB in the Admin panel.
 """)
 
-st.title("FAQ")
-st.write("""
-
-### How do I reset the system?
-Run init.py to reset all data in the system. Please only do this if necessary and the data being erased is backed up.
-
-### How do I register in the system?
-Go to the Registering page and type in your name and your desired PIN. You should be in the system now!
-
-### How do I upload data to Google drive?
-Go to the Admin page and type in the administrator password. Go to the "Upload Data to Cloud" section, and type in your email in the text box. Click Upload Data.
-
-### How do I reset my PIN?
-Ask a mentor or a member of the leadership team.
-
-
-""")
+st.info("Built for the Robotiators | No Maintenance Required.")

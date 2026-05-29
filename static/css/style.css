@@ -1,0 +1,32 @@
+/* Tropical Fortress Styling */
+.stApp {
+    background: linear-gradient(rgba(0, 77, 64, 0.9), rgba(0, 37, 26, 0.9)),
+                url('https://images.unsplash.com/photo-1550418290-a8d86ad674a6?auto=format&fit=crop&w=1920&q=80'); /* Jungle background */
+    background-size: cover;
+}
+
+.stSidebar {
+    background-color: rgba(0, 37, 26, 0.95) !important;
+    border-right: 2px solid #ffca28;
+}
+
+h1, h2, h3, p, span, label, .stMarkdown {
+    color: #e0f2f1 !important;
+}
+
+h1, h2 {
+    color: #ffca28 !important;
+    text-shadow: 3px 3px 5px #000;
+}
+
+.css-1offfwp { /* Button text */
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.stMetric {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 15px;
+    border: 1px solid #81c784;
+}
