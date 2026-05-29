@@ -24,10 +24,11 @@ def save_encodings(user_id, encodings_list):
 def identify_face(image_np, tolerance=0.45):
     """
     Identifies the BIGGEST face in view, with a 10-minute cooldown per user.
+    Returns (user_id, message, face_location)
     """
     face_locations = face_recognition.face_locations(image_np)
     if not face_locations:
-        return None, "No face detected"
+        return None, "No face detected", None
 
     # Find the biggest face (by area)
     # location is (top, right, bottom, left)
@@ -43,7 +44,7 @@ def identify_face(image_np, tolerance=0.45):
     unknown_encodings = face_recognition.face_encodings(image_np, [biggest_face_location])
 
     if not unknown_encodings:
-        return None, "Encoding failed"
+        return None, "Encoding failed", biggest_face_location
 
     unknown_encoding = unknown_encodings[0]
 
@@ -54,7 +55,7 @@ def identify_face(image_np, tolerance=0.45):
 
     if not rows:
         conn.close()
-        return None, "No registered faces"
+        return None, "No registered faces", biggest_face_location
 
     known_encodings = []
     user_ids = []
@@ -77,10 +78,10 @@ def identify_face(image_np, tolerance=0.45):
                 last_ts = datetime.strptime(last_log[0], "%Y-%m-%d %H:%M:%S")
                 if datetime.now() - last_ts < timedelta(minutes=10):
                     conn.close()
-                    return None, "Cooldown active"
+                    return None, "Cooldown active", biggest_face_location
 
             conn.close()
-            return uid, "Match found"
+            return uid, "Match found", biggest_face_location
 
     conn.close()
-    return None, "No match found"
+    return None, "No match found", biggest_face_location

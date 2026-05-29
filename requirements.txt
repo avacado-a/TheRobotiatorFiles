@@ -1,6 +1,5 @@
 streamlit
 pandas
-sqlite3
 face_recognition
 opencv-python-headless
 numpy

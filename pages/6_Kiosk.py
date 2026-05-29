@@ -48,7 +48,11 @@ with col_main:
     for _, user in users.iterrows():
         hours = calculate_hours_for_user(user['id'], year, season)
         data.append({"Personnel": user['nickname'] or user['name'], "Hours": hours})
-    df = pd.DataFrame(data).sort_values(by="Hours", ascending=False).head(10)
+    
+    if data:
+        df = pd.DataFrame(data).sort_values(by="Hours", ascending=False).head(10)
+    else:
+        df = pd.DataFrame(columns=["Personnel", "Hours"])
 
     st.table(df)
 

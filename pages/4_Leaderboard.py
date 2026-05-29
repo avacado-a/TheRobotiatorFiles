@@ -36,7 +36,10 @@ for _, user in users.iterrows():
     display_name = user['nickname'] if user['nickname'] else user['name']
     data.append({"Personnel": display_name, "Hours": hours})
 
-df = pd.DataFrame(data).sort_values(by="Hours", ascending=False).reset_index(drop=True)
+if data:
+    df = pd.DataFrame(data).sort_values(by="Hours", ascending=False).reset_index(drop=True)
+else:
+    df = pd.DataFrame(columns=["Personnel", "Hours"])
 
 if not df.empty:
     for idx, row in df.iterrows():
