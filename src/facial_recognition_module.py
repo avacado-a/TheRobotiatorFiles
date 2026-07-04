@@ -1,3 +1,4 @@
+import dlib
 import face_recognition
 import numpy as np
 import sqlite3
@@ -12,14 +13,18 @@ def encode_face(image_np):
         return None
     return encodings[0]
 
-def save_encodings(user_id, encodings_list):
-    conn = get_db_connection()
+def save_encodings(user_id, encodings_list, conn=None):
+    should_close = False
+    if conn is None:
+        conn = get_db_connection()
+        should_close = True
     cursor = conn.cursor()
     for enc in encodings_list:
         encoding_bytes = enc.tobytes()
         cursor.execute("INSERT INTO facial_encodings (user_id, encoding) VALUES (?, ?)", (user_id, encoding_bytes))
-    conn.commit()
-    conn.close()
+    if should_close:
+        conn.commit()
+        conn.close()
 
 def identify_face(image_np, tolerance=0.45):
     """

@@ -1,4 +1,7 @@
+import dlib
 import streamlit as st
+if not hasattr(st, "rerun"):
+    st.rerun = st.experimental_rerun
 import sqlite3
 import cv2
 import numpy as np
@@ -109,7 +112,7 @@ else:
                 cv2.putText(frame, "COOLDOWN", (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
 
         # Update Placeholder
-        frame_placeholder.image(frame, channels="BGR", use_container_width=True)
+        frame_placeholder.image(frame, channels="BGR", use_column_width=True)
 
         if uid:
             conn = get_db_connection()

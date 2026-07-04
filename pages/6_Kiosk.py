@@ -1,4 +1,6 @@
 import streamlit as st
+if not hasattr(st, "rerun"):
+    st.rerun = st.experimental_rerun
 import time
 import pandas as pd
 from src.attendance_logic import get_db_connection, get_system_config, get_total_fortress_hours, calculate_hours_for_user

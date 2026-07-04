@@ -7,6 +7,12 @@ DB_PATH = "data/attendance.db"
 LOG_TXT_PATH = "data/log.txt"
 
 def get_db_connection():
+    db_dir = os.path.dirname(DB_PATH)
+    if db_dir and not os.path.exists(db_dir):
+        os.makedirs(db_dir, exist_ok=True)
+    if not os.path.exists(DB_PATH):
+        from src.init_db import init_db
+        init_db()
     return sqlite3.connect(DB_PATH)
 
 def write_plaintext_log(message):

@@ -1,4 +1,6 @@
 import streamlit as st
+if not hasattr(st, "rerun"):
+    st.rerun = st.experimental_rerun
 import sqlite3
 import pandas as pd
 from src.attendance_logic import get_system_config, get_db_connection

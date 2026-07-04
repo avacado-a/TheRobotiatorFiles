@@ -1,4 +1,7 @@
+import dlib
 import streamlit as st
+if not hasattr(st, "rerun"):
+    st.rerun = st.experimental_rerun
 import sqlite3
 import cv2
 import numpy as np
@@ -16,29 +19,62 @@ name = st.text_input("Full Name")
 nickname = st.text_input("Nickname (Optional)")
 pin = st.text_input("Create a numeric PIN (4+ digits)", type="password")
 
+import streamlit.components.v1 as components
+import os
+import base64
+
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+component_dir = os.path.join(parent_dir, "src", "camera_component")
+face_scanner = components.declare_component("face_scanner", path=component_dir)
+
+if "scanner_key" not in st.session_state:
+    st.session_state.scanner_key = 0
+
 st.markdown("---")
 st.subheader("🤖 Biometric Profile (Optional)")
-st.info("Capture 5 photos to enable facial recognition login.")
+st.info("Follow the instructions on the interactive scanner to capture 5 profile angles (Straight, Left, Right, Up, Down).")
 
-img_file = st.camera_input("Face Scan")
-
-if img_file and len(st.session_state.reg_photos) < 5:
-    if st.button(f"Add Photo {len(st.session_state.reg_photos) + 1}"):
-        bytes_data = img_file.getvalue()
-        cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
-        rgb_img = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2RGB)
-
-        encoding = encode_face(rgb_img)
-        if encoding is not None:
-            st.session_state.reg_photos.append(encoding)
-            st.success("Photo added!")
+if "photos_processed" not in st.session_state or not st.session_state.reg_photos:
+    scanned_images = face_scanner(key=f"face_scanner_{st.session_state.scanner_key}", height=650)
+    
+    if scanned_images:
+        st.session_state.reg_photos = []
+        failed_encodings = 0
+        
+        with st.spinner("Processing biometric scans..."):
+            for base64_str in scanned_images:
+                try:
+                    header, encoded = base64_str.split(",", 1)
+                    data = base64.b64decode(encoded)
+                    nparr = np.frombuffer(data, np.uint8)
+                    cv2_img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                    rgb_img = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2RGB)
+                    
+                    encoding = encode_face(rgb_img)
+                    if encoding is not None:
+                        st.session_state.reg_photos.append(encoding)
+                    else:
+                        failed_encodings += 1
+                except Exception as e:
+                    failed_encodings += 1
+                    
+        if len(st.session_state.reg_photos) > 0:
+            st.session_state.photos_processed = True
+            if failed_encodings == 0:
+                st.success("✅ Biometric scan complete! All 5 profile orientations registered.")
+            else:
+                st.warning(f"Scan complete. Registered {len(st.session_state.reg_photos)}/5 profile angles.")
             st.rerun()
         else:
-            st.error("Face not found. Please try again.")
-
-if st.button("Clear Biometric Data"):
-    st.session_state.reg_photos = []
-    st.rerun()
+            st.error("Could not detect a face in any of the scans. Please reset and try again.")
+else:
+    st.success(f"✅ Biometric profile loaded ({len(st.session_state.reg_photos)} profile angles registered).")
+    if st.button("Reset Facial Scanner"):
+        st.session_state.scanner_key += 1
+        st.session_state.reg_photos = []
+        if "photos_processed" in st.session_state:
+            del st.session_state.photos_processed
+        st.rerun()
 
 st.markdown("---")
 if name and pin:
@@ -52,7 +88,7 @@ if name and pin:
                 cursor.execute("INSERT INTO users (name, nickname, pin) VALUES (?, ?, ?)", (name, nickname, pin))
                 user_id = cursor.lastrowid
                 if st.session_state.reg_photos:
-                    save_encodings(user_id, st.session_state.reg_photos)
+                    save_encodings(user_id, st.session_state.reg_photos, conn=conn)
                 conn.commit()
                 st.balloons()
                 st.success(f"Welcome to the Fortress, {name}!")
