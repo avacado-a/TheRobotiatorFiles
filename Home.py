@@ -3,8 +3,6 @@ import sqlite3
 import pandas as pd
 from src.attendance_logic import get_db_connection, get_system_config
 
-
-# Test Commit: Will undo.
 st.set_page_config(page_title="Guide | Robotiator Files", layout="wide")
 
 # Theme
