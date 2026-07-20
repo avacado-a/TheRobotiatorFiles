@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, url_for
 import db
 from flask_apscheduler import APScheduler
 import time
@@ -31,24 +31,37 @@ def scheduled_task():
 
     
 @app.route('/logging', methods=['GET', 'POST'])
-def login():
+def logging():
     if request.method == 'POST':
         pin = request.form['pin']
-        state = db.get_state()
-        if '1234' not in state:
-            db.create_user("Aikam", 1234)
         state = db.get_state()
         if pin in state and not state[pin]['logged_in']:
             db.login_user(state[pin]['username'], pin)
         elif pin in state and state[pin]['logged_in']:
             db.logout_user(state[pin]['username'], pin)
-        return render_template('logging.html')
     return render_template('logging.html')
 
+@app.route("/logging.html")
+def logging_redirect():
+    return redirect(url_for('logging'))
+
+@app.route('/registration', methods=['GET', 'POST'])
+def registration():
+    if request.method == 'POST':
+        username = request.form['username']
+        pin = request.form['pin'] # Make sure this is a 4 digit or longer positive pin
+        state = db.get_state()
+        if pin not in state:
+            db.create_user(username, pin)
+    return render_template('registration.html')
+
+@app.route("/registration.html")
+def registration_redirect():
+    return redirect(url_for('registration'))
 
 @app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+def root_redirect():
+    return redirect(url_for('logging'))
 
 
 if __name__ == "__main__":
