@@ -9,10 +9,13 @@ scheduler = APScheduler()
 
 
 gerstner_hours = 0
+total_people_in_shop = 0
 def scheduled_task():
     ret = db.get_state()
     global gerstner_hours
+    global total_people_in_shop
     gerstner_hours = ret.get('gerstner_sec', 0)/60
+    total_people_in_shop = ret.get('total_logged_in', 0)
 
 
     earliest_login_today = None

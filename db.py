@@ -79,6 +79,7 @@ def get_state():
                     users.remove(parsedLine[2])
                     users.append(parsedLine[4])
     ret['users'] = users
+    ret['total_logged_in'] = number_logged_in
     # breakpoint()
     return ret
 
