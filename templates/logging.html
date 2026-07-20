@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <div class="nav">
+        <button class="navbtn">About</button>
+        <button class="navbtn">Logging</button>
+        <a href="registration.html"><button class="navbtn">Registration</button></a>
+        <button class="navbtn">Leaderboard</button>
+        <button class="navbtn">Admin</button>
+    </div>
+    <h3>Enter Your Pin</h3>
+    <form method="post">
+        <input type="text" name="pin" required>
+        <br><br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
+<style>
+.navbtn {
+        position: relative;
+        width: 7%;
+        border-style: none;
+        border-radius: 5px;
+        background-color: red;
+        color: black;
+        height: 7%;
+        transition: width .5s;
+}
+.navbtn:hover {
+        width: 10%;
+}
+</style>

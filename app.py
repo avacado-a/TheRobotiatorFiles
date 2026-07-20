@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, render_template
 import db
 from flask_apscheduler import APScheduler
 import time
@@ -9,13 +9,10 @@ scheduler = APScheduler()
 
 
 gerstner_hours = 0
-total_people_in_shop = 0
 def scheduled_task():
     ret = db.get_state()
     global gerstner_hours
-    global total_people_in_shop
     gerstner_hours = ret.get('gerstner_sec', 0)/60
-    total_people_in_shop = ret.get('total_logged_in', 0)
 
 
     earliest_login_today = None
@@ -33,6 +30,20 @@ def scheduled_task():
         gerstner_hours += gerstner_sec_today / 60
 
     
+@app.route('/logging', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        pin = request.form['pin']
+        state = db.get_state()
+        if '1234' not in state:
+            db.create_user("Aikam", 1234)
+        state = db.get_state()
+        if pin in state and not state[pin]['logged_in']:
+            db.login_user(state[pin]['username'], pin)
+        elif pin in state and state[pin]['logged_in']:
+            db.logout_user(state[pin]['username'], pin)
+        return render_template('logging.html')
+    return render_template('logging.html')
 
 
 @app.route("/")
