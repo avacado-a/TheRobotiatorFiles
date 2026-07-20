@@ -88,16 +88,16 @@ def get_state():
                     users.remove(parsedLine[2])
                     users.append(parsedLine[4])
             elif parsedLine[3] == "delete_time":
-                if parsedLine[2] in ret and ret[parsedLine[2]]["activated"] and not ret[parsedLine[2]]["logged_in"]:
-                    ret[parsedLine[2]][current_season]["total_hours"] += 30
-                    ret[current_season]["total_hours"] += 30
+                if parsedLine[2] in ret and ret[parsedLine[2]]["activated"] and ret[parsedLine[2]]["logged_in"]:
+                    ret[parsedLine[2]][current_season]["total_hours"] += 0.5
+                    ret[current_season]["total_hours"] += 0.5
 
                     ret[parsedLine[2]]["last_log"] = parsedLine[0]
                     ret[parsedLine[2]]["logged_in"] = False
                     number_logged_in -= 1
                     if number_logged_in == 0:
                         ret['gerstner_sec'] += time.mktime(time.strptime(ret[current_season]["last_log"], "%Y-%m-%d %H:%M:%S")) - time.mktime(time.strptime(ret[current_season]["first_login"], "%Y-%m-%d %H:%M:%S"))
-                        if ret[current_season]["last_log_type"] == "logout":
+                        if ret[current_season]["last_log_type"] == "login":
                             ret['gerstner_sec'] += 30*60
 
 

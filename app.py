@@ -28,7 +28,7 @@ def scheduled_task():
         for user in ret['users']:
             if ret[user]['logged_in']:
                 # db.logout_user(ret[user]['username'], ret[user]['pin'])
-                db.delete_time(ret[user]['username'], ret[user]['pin'], time.time() - time.mktime(time.strptime(ret[user]["last_log"], "%Y-%m-%d %H:%M:%S")))
+                db.delete_time(ret[user]['username'], ret[user]['pin'])
 
 
     earliest_login_today = None
