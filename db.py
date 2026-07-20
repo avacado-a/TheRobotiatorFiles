@@ -32,7 +32,7 @@ def get_state():
     current_season = ""
     ret = {}
     users = []
-    ret['gerstner_hours'] = 0
+    ret['gerstner_sec'] = 0
     number_logged_in = 0
     with open("db.txt", "r") as f:
         lines = f.readlines()
@@ -65,7 +65,7 @@ def get_state():
                     ret[parsedLine[2]]["logged_in"] = False
                     number_logged_in -= 1
                     if number_logged_in == 0:
-                        ret['gerstner_hours'] += end_time - time.mktime(time.strptime(ret[current_season]["first_login"], "%Y-%m-%d %H:%M:%S"))
+                        ret['gerstner_sec'] += end_time - time.mktime(time.strptime(ret[current_season]["first_login"], "%Y-%m-%d %H:%M:%S"))
             elif parsedLine[3] == "deactivate":
                 if parsedLine[2] in ret and ret[parsedLine[2]]["activated"] and not ret[parsedLine[2]]["logged_in"]:
                     ret[parsedLine[2]]["activated"] = False
