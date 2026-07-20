@@ -115,4 +115,4 @@ def write_csv(csvpath):
 if __name__ == "__main__":
     scheduler.add_job(id='my_background_task', func=scheduled_task, trigger='interval', seconds=5)
     scheduler.start()
-    app.run(debug=True,use_reloader=False)
+    app.run(port=8501,host="0.0.0.0",debug=True,use_reloader=False)

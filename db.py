@@ -46,6 +46,7 @@ def get_state():
             if parsedLine[3] == "change_season":
                 current_season = parsedLine[4]
                 ret[current_season] = {"total_hours":0}
+                ret['gerstner_sec'] = 0
                 for user in users:
                     ret[user][current_season] = {"total_hours":0}
             elif parsedLine[3] == "create":
@@ -105,6 +106,7 @@ def get_state():
     ret['users'] = users
     ret['total_logged_in'] = number_logged_in
     # breakpoint()
+    print("DB called")
     return ret
 
 # change_season("2026Offseason")
