@@ -28,6 +28,10 @@ def change_season(season: str):
     with open("db.txt", "a") as f:
         f.write(time.strftime("%Y-%m-%d %H:%M:%S") + "|" + "system" + "|" + "-1" + "|" + "change_season" + "|" + season + "\n")
 
+def delete_time(username: str, pin: int):
+    with open("db.txt", "a") as f:
+        f.write(time.strftime("%Y-%m-%d %H:%M:%S") + "|" + username + "|" + str(pin) + "|" + "delete_time" +"\n")
+
 def get_state():
     current_season = ""
     ret = {}
@@ -51,6 +55,8 @@ def get_state():
             elif parsedLine[3] == "login":
                 if parsedLine[2] in ret and ret[parsedLine[2]]["activated"] and not ret[parsedLine[2]]["logged_in"]:
                     ret[parsedLine[2]]["last_log"] = parsedLine[0]
+                    ret[current_season]["last_log"] = parsedLine[0]
+                    ret[current_season]["last_log_type"] = "login"
                     ret[parsedLine[2]]["logged_in"] = True
                     number_logged_in += 1
                     if number_logged_in == 1:
@@ -64,6 +70,8 @@ def get_state():
                     ret[current_season]["total_hours"] += addedHours / 3600
                     ret[parsedLine[2]]["last_log"] = parsedLine[0]
                     ret[parsedLine[2]]["logged_in"] = False
+                    ret[current_season]["last_log"] = parsedLine[0]
+                    ret[current_season]["last_log_type"] = "logout"
                     number_logged_in -= 1
                     if number_logged_in == 0:
                         ret['gerstner_sec'] += end_time - time.mktime(time.strptime(ret[current_season]["first_login"], "%Y-%m-%d %H:%M:%S"))
@@ -79,6 +87,19 @@ def get_state():
                     ret[parsedLine[4]]["pin"] = parsedLine[4]
                     users.remove(parsedLine[2])
                     users.append(parsedLine[4])
+            elif parsedLine[3] == "delete_time":
+                if parsedLine[2] in ret and ret[parsedLine[2]]["activated"] and not ret[parsedLine[2]]["logged_in"]:
+                    ret[parsedLine[2]][current_season]["total_hours"] += 30
+                    ret[current_season]["total_hours"] += 30
+
+                    ret[parsedLine[2]]["last_log"] = parsedLine[0]
+                    ret[parsedLine[2]]["logged_in"] = False
+                    number_logged_in -= 1
+                    if number_logged_in == 0:
+                        ret['gerstner_sec'] += - time.mktime(time.strptime(ret[current_season]["last_log"], "%Y-%m-%d %H:%M:%S")) - time.mktime(time.strptime(ret[current_season]["first_login"], "%Y-%m-%d %H:%M:%S"))
+                        if ret[current_season]["last_log_type"] == "logout":
+                            ret['gerstner_sec'] += 30*60
+
 
     ret['current_season'] = current_season
     ret['users'] = users

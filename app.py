@@ -9,14 +9,27 @@ app = Flask(__name__)
 scheduler = APScheduler()
 
 
-
+last_day = time.localtime().tm_mday
 
 def scheduled_task():
+
     ret = db.get_state()
     gerstner_hours = ret.get('gerstner_sec', 0)/3600
     total_people_in_shop = ret.get('total_logged_in', 0)
     total_hours = ret.get(ret['current_season'], {}).get('total_hours', 0)
     current_season = ret.get('current_season', '')
+
+
+
+    global last_day
+    current_day = time.localtime().tm_mday
+    if current_day != last_day:
+        last_day = current_day
+        for user in ret['users']:
+            if ret[user]['logged_in']:
+                # db.logout_user(ret[user]['username'], ret[user]['pin'])
+                db.delete_time(ret[user]['username'], ret[user]['pin'], time.time() - time.mktime(time.strptime(ret[user]["last_log"], "%Y-%m-%d %H:%M:%S")))
+
 
     earliest_login_today = None
     anyone_logged_in = False
