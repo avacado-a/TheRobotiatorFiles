@@ -2,14 +2,15 @@ from flask import Flask, request, render_template, redirect, url_for
 import db
 from flask_apscheduler import APScheduler
 import time
-
-
-    
+import csv
+ 
 app = Flask(__name__)
 scheduler = APScheduler()
 
 
 last_day = time.localtime().tm_mday
+
+leaderboard = []
 
 def scheduled_task():
 
@@ -45,7 +46,7 @@ def scheduled_task():
         gerstner_sec_today = current_time - earliest_login_today if earliest_login_today else 0
         gerstner_hours += gerstner_sec_today / 3600
 
-    leaderboard = []
+    global leaderboard
     for user in ret['users']:
 
         leaderboard.append({
@@ -102,6 +103,14 @@ def registration_redirect():
 def root_redirect():
     return redirect(url_for('logging'))
 
+def write_csv(csvpath):
+    global leaderboard
+    filteredBoard = filter(lambda x: x["activated"], leaderboard)
+    with open(csvpath, 'w') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(["Name", "Hours"])
+        for user in filteredBoard:
+            csvwriter.writerow([user["username"], user["total_hours"]])
 
 if __name__ == "__main__":
     scheduler.add_job(id='my_background_task', func=scheduled_task, trigger='interval', seconds=5)
