@@ -13,9 +13,9 @@ scheduler = APScheduler()
 
 def scheduled_task():
     ret = db.get_state()
-    gerstner_hours = ret.get('gerstner_sec', 0)/60
+    gerstner_hours = ret.get('gerstner_sec', 0)/3600
     total_people_in_shop = ret.get('total_logged_in', 0)
-    total_hours = ret.get(ret['current_season'], {}).get('total_hours', 0)/60
+    total_hours = ret.get(ret['current_season'], {}).get('total_hours', 0)
     current_season = ret.get('current_season', '')
 
     earliest_login_today = None
@@ -30,7 +30,7 @@ def scheduled_task():
     if anyone_logged_in:
         current_time = time.time()
         gerstner_sec_today = current_time - earliest_login_today if earliest_login_today else 0
-        gerstner_hours += gerstner_sec_today / 60
+        gerstner_hours += gerstner_sec_today / 3600
 
     leaderboard = []
     for user in ret['users']:
@@ -43,6 +43,16 @@ def scheduled_task():
         })
 
     leaderboard.sort(key=lambda x: x['total_hours'], reverse=True)
+
+    print(f"Current Season: {current_season}")
+    print(f"Total Hours: {total_hours:.2f}")
+    print(f"Gerstner Hours: {gerstner_hours:.2f}")
+
+    print(f"Gerstner Hours from Log: {ret.get('gerstner_sec', 0)/3600:.2f}")
+    print(f"Total People in Shop: {total_people_in_shop}")
+    print("Leaderboard:")
+    for entry in leaderboard:
+        print(f"Username: {entry['username']}, Total Hours: {entry['total_hours']:.2f}, Logged In: {entry['logged_in']}, Activated: {entry['activated']}")
     
 
     

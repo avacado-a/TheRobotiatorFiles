@@ -82,6 +82,7 @@ def get_state():
 
     ret['current_season'] = current_season
     ret['users'] = users
+    ret['total_logged_in'] = number_logged_in
     # breakpoint()
     return ret
 
