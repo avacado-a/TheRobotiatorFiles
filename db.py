@@ -96,7 +96,7 @@ def get_state():
                     ret[parsedLine[2]]["logged_in"] = False
                     number_logged_in -= 1
                     if number_logged_in == 0:
-                        ret['gerstner_sec'] += - time.mktime(time.strptime(ret[current_season]["last_log"], "%Y-%m-%d %H:%M:%S")) - time.mktime(time.strptime(ret[current_season]["first_login"], "%Y-%m-%d %H:%M:%S"))
+                        ret['gerstner_sec'] += time.mktime(time.strptime(ret[current_season]["last_log"], "%Y-%m-%d %H:%M:%S")) - time.mktime(time.strptime(ret[current_season]["first_login"], "%Y-%m-%d %H:%M:%S"))
                         if ret[current_season]["last_log_type"] == "logout":
                             ret['gerstner_sec'] += 30*60
 
