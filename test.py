@@ -1,7 +1,7 @@
 import random
 from datetime import datetime, timedelta
 
-def generate_massive_db(filename="db.txt", num_users=1000, total_events=10000000):
+def generate_massive_db(filename="db.txt", num_users=10, total_events=100):
     print(f"Generating {total_events} events for {num_users} users...")
     
     base_time = datetime(2026, 1, 1, 8, 0, 0)

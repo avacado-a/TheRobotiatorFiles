@@ -32,6 +32,7 @@ def get_state():
     current_season = ""
     ret = {}
     users = []
+    
     ret['gerstner_sec'] = 0
     number_logged_in = 0
     with open("db.txt", "r") as f:
@@ -78,7 +79,10 @@ def get_state():
                     ret[parsedLine[4]]["pin"] = parsedLine[4]
                     users.remove(parsedLine[2])
                     users.append(parsedLine[4])
+
+    ret['current_season'] = current_season
     ret['users'] = users
+    ret['total_logged_in'] = number_logged_in
     # breakpoint()
     return ret
 
