@@ -1,9 +1,9 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, send_file
 import db
 from flask_apscheduler import APScheduler
 import time
 import csv
- 
+import os
 app = Flask(__name__)
 scheduler = APScheduler()
 
@@ -103,6 +103,11 @@ def registration_redirect():
 def root_redirect():
     return redirect(url_for('logging'))
 
+
+@app.route('/admin', methods=['GET'])
+def admin():
+    return render_template('admin.html')
+
 def write_csv(csvpath):
     global leaderboard
     filteredBoard = filter(lambda x: x["activated"], leaderboard)
@@ -111,8 +116,16 @@ def write_csv(csvpath):
         csvwriter.writerow(["Name", "Hours"])
         for user in filteredBoard:
             csvwriter.writerow([user["username"], user["total_hours"]])
+    print(f"CSV written to {csvpath}")
+
+@app.route('/admin/export_csv')
+def export_csv():
+    csvpath = os.path.join(os.getcwd(), './leaderboard.csv')
+    write_csv(csvpath)
+    return send_file(csvpath, as_attachment=True)
 
 if __name__ == "__main__":
-    scheduler.add_job(id='my_background_task', func=scheduled_task, trigger='interval', seconds=5)
+    scheduled_task()
+    scheduler.add_job(id='my_background_task', func=scheduled_task, trigger='interval', seconds=60)
     scheduler.start()
     app.run(port=8501,host="0.0.0.0",debug=True,use_reloader=False)
