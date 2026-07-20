@@ -5,10 +5,11 @@ import time
     
 app = Flask(__name__)
 scheduler = APScheduler()
-
+gerstner_hours = 0
 def scheduled_task():
     ret = db.get_state()
-    gerstner_hours_today = 0
+    gerstner_hours = ret.get('gerstner_hours', 0)
+    gerster_hours_today = 0
 
 
     earliest_login_today = None
@@ -31,6 +32,10 @@ def scheduled_task():
     else:
         current_time = time.time()
         gerstner_hours_today = current_time - earliest_login_today if earliest_login_today else 0
+
+    gerstner_hours += gerstner_hours_today
+
+    
 
 
 @app.route("/")
