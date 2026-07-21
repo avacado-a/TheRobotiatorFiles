@@ -1,37 +1,33 @@
 {% extends "base.html" %}
 
-{% block title %}Logging | Robotiator Files{% endblock %}
+{% block title %}Check In/Out | Robotiators{% endblock %}
 
 {% block content %}
-    <h1>🚀 Logging</h1>
-
-    <div class="info">
-        <p>Enter your PIN to log in or out of the workshop.</p>
-    </div>
+    <h1>Check In / Out</h1>
 
     {% if message %}
-        <div class="success">{{ message }}</div>
+        <div class="alert {% if success %}alert-success{% else %}alert-error{% endif %}">
+            {{ message }}
+        </div>
     {% endif %}
 
-    <form method="POST">
-        <label for="pin"><h3>Your PIN</h3></label>
-        <input 
-            type="text" 
-            id="pin" 
-            name="pin" 
-            placeholder="Enter your 4+ digit PIN" 
-            required 
-            autofocus
-        >
-        <input type="submit" value="Log In / Out">
-    </form>
+    <div class="card" style="max-width: 400px; margin: 0 auto;">
+        <form method="POST">
+            <label for="pin"><strong>Enter Your PIN:</strong></label>
+            <input 
+                type="password" 
+                id="pin" 
+                name="pin" 
+                placeholder="4+ digit PIN" 
+                required 
+                autofocus
+                style="font-size: 1.5em; text-align: center; margin-top: 10px; margin-bottom: 20px;"
+            >
+            <input type="submit" value="Log In / Out" style="width: 100%; font-size: 1.2em; padding: 12px;">
+        </form>
+    </div>
 
-    <div class="card">
-        <h3>💡 Quick Tips</h3>
-        <ul style="margin-left: 1.5rem;">
-            <li>Enter your PIN and submit to toggle your login status</li>
-            <li>The system will automatically log you out at midnight</li>
-            <li>Visit <strong>Registration</strong> to create your account</li>
-        </ul>
+    <div style="text-align: center; margin-top: 20px;">
+        <p>Don't have a PIN yet? <a href="/registration">Register here</a></p>
     </div>
 {% endblock %}

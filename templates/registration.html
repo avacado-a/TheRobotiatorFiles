@@ -1,52 +1,43 @@
 {% extends "base.html" %}
 
-{% block title %}Registration | Robotiator Files{% endblock %}
+{% block title %}Register | Robotiators{% endblock %}
 
 {% block content %}
-    <h1>📋 Registration</h1>
-
-    <div class="info">
-        <p>Create a new account to start logging your workshop hours.</p>
-    </div>
+    <h1>Student Registration</h1>
 
     {% if message %}
-        <div class="success">{{ message }}</div>
+        <div class="alert {% if success %}alert-success{% else %}alert-error{% endif %}">
+            {{ message }}
+        </div>
     {% endif %}
 
-    <form method="POST">
-        <label for="username"><h3>Full Name</h3></label>
-        <input 
-            type="text" 
-            id="username" 
-            name="username" 
-            placeholder="Enter your full name" 
-            required
-        >
+    <div class="card" style="max-width: 400px; margin: 0 auto;">
+        <form method="POST">
+            <label for="username"><strong>Full Name:</strong></label>
+            <input 
+                type="text" 
+                id="username" 
+                name="username" 
+                placeholder="Enter your first and last name" 
+                required
+                style="margin-top: 5px; margin-bottom: 15px;"
+            >
 
-        <label for="pin"><h3>Create a PIN</h3></label>
-        <input 
-            type="text" 
-            id="pin" 
-            name="pin" 
-            placeholder="Enter a 4+ digit PIN (numbers only)" 
-            required
-        >
+            <label for="pin"><strong>Choose a PIN:</strong></label>
+            <input 
+                type="password" 
+                id="pin" 
+                name="pin" 
+                placeholder="At least 4 digits (numbers only)" 
+                required
+                style="margin-top: 5px; margin-bottom: 20px;"
+            >
 
-        <input type="submit" value="Create Account">
-    </form>
-
-    <div class="card">
-        <h3>🔐 PIN Requirements</h3>
-        <ul style="margin-left: 1.5rem;">
-            <li>Must be 4 or more digits</li>
-            <li>Must be unique (not used by another member)</li>
-            <li>Write it down somewhere safe!</li>
-            <li>You'll use this PIN to log in and out</li>
-        </ul>
+            <input type="submit" value="Register Account" style="width: 100%; font-size: 1.1em; padding: 10px;">
+        </form>
     </div>
 
-    <div class="card">
-        <h3>✨ Next Steps</h3>
-        <p>After registration, head to the <strong>Logging</strong> page to start logging your hours!</p>
+    <div style="text-align: center; margin-top: 20px;">
+        <p>Already have an account? <a href="/logging">Check in/out here</a></p>
     </div>
 {% endblock %}

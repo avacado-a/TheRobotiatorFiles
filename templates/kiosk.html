@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robotiators Kiosk</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #b30000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .header-bar h1 {
+            color: #ff3333;
+            margin: 0;
+            font-size: 2.2em;
+        }
+
+        .back-link {
+            color: #888;
+            text-decoration: none;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #fff;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .stats-banner {
+            display: flex;
+            justify-content: space-around;
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            border-radius: 4px;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ff3333;
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1.2em;
+        }
+
+        th, td {
+            border: 1px solid #333;
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #1a1a1a;
+            color: #ff3333;
+        }
+
+        tr:nth-child(even) {
+            background-color: #161616;
+        }
+
+        .checked-in-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .checked-in-list li {
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-size: 1.3em;
+            border-left: 5px solid #00cc66;
+        }
+
+        .time-badge {
+            font-size: 0.8em;
+            color: #888;
+            float: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-bar">
+        <h1>Team 888 Robotiators Kiosk</h1>
+        <a href="/" class="back-link">Return to Portal</a>
+    </div>
+
+    <div class="stats-banner">
+        <div class="stat-box">
+            <span class="stat-label">Season Name</span>
+            <span class="stat-value" id="kiosk-season">{{ stats.current_season }}</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">Total Season Hours</span>
+            <span class="stat-value" id="kiosk-hours">{{ "%.2f"|format(stats.total_hours) }}</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">Gerstner Hours</span>
+            <span class="stat-value" id="kiosk-gerstner">{{ "%.2f"|format(stats.gerstner_hours) }}</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">Students in Shop</span>
+            <span class="stat-value" id="kiosk-people">{{ stats.total_people_in_shop }}</span>
+        </div>
+    </div>
+
+    <div class="grid">
+        <!-- Leaderboard -->
+        <div>
+            <h2>Current Leaderboard</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 10%;">Rank</th>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Hours</th>
+                    </tr>
+                </thead>
+                <tbody id="kiosk-leaderboard">
+                    {% for entry in leaderboard %}
+                    {% if entry.activated %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td><strong>{{ entry.username }}</strong></td>
+                        <td>{{ "In Shop" if entry.logged_in else "Away" }}</td>
+                        <td>{{ "%.2f"|format(entry.total_hours) }}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Checked In List -->
+        <div>
+            <h2>Checked In Now</h2>
+            <ul class="checked-in-list" id="kiosk-active-list">
+                {% for user in stats.logged_in_users %}
+                <li>
+                    <strong>{{ user.username }}</strong>
+                    <span class="time-badge">Since {{ user.login_time.split(' ')[1] }}</span>
+                </li>
+                {% else %}
+                <li style="border-left-color: #555; color: #888;">Shop is empty.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        socket.on('state_update', (data) => {
+            document.getElementById('kiosk-season').innerText = data.stats.current_season;
+            document.getElementById('kiosk-hours').innerText = parseFloat(data.stats.total_hours).toFixed(2);
+            document.getElementById('kiosk-gerstner').innerText = parseFloat(data.stats.gerstner_hours).toFixed(2);
+            document.getElementById('kiosk-people').innerText = data.stats.total_people_in_shop;
+
+            // Rebuild Leaderboard
+            const tbody = document.getElementById('kiosk-leaderboard');
+            tbody.innerHTML = '';
+            let rank = 0;
+            data.leaderboard.forEach(entry => {
+                if (!entry.activated) return;
+                rank++;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${rank}</td>
+                    <td><strong>${entry.username}</strong></td>
+                    <td>${entry.logged_in ? "In Shop" : "Away"}</td>
+                    <td>${parseFloat(entry.total_hours).toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Rebuild Checked In List
+            const activeList = document.getElementById('kiosk-active-list');
+            activeList.innerHTML = '';
+            if (data.stats.logged_in_users.length > 0) {
+                data.stats.logged_in_users.forEach(user => {
+                    const li = document.createElement('li');
+                    const timeOnly = user.login_time.split(' ')[1];
+                    li.innerHTML = `<strong>${user.username}</strong> <span class="time-badge">Since ${timeOnly}</span>`;
+                    activeList.appendChild(li);
+                });
+            } else {
+                activeList.innerHTML = '<li style="border-left-color: #555; color: #888;">Shop is empty.</li>';
+            }
+        });
+    </script>
+</body>
+</html>

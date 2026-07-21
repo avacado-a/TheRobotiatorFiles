@@ -1,63 +1,130 @@
 {% extends "base.html" %}
 
-{% block title %}Admin | Robotiator Files{% endblock %}
+{% block title %}Admin | Robotiators{% endblock %}
 
 {% block content %}
-    <h1>⚙️ Admin Settings</h1>
 
-    <div class="info">
-        <p>Administrative tools for managing the Robotiator Files system.</p>
+{% if needs_login %}
+    <!-- Admin Login -->
+    <div style="max-width: 400px; margin: 40px auto;" class="card">
+        <h2>Admin Portal</h2>
+        {% if error %}
+            <div class="alert alert-error">{{ error }}</div>
+        {% endif %}
+        <form method="POST">
+            <label for="admin_pin"><strong>Enter Admin Password:</strong></label>
+            <input type="password" name="admin_pin" id="admin_pin" required style="margin-top: 10px; margin-bottom: 20px; font-size: 1.2em; text-align: center;">
+            <input type="submit" value="Login" style="width: 100%;">
+        </form>
+    </div>
+{% else %}
+    <!-- Console -->
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h1>Admin Control Panel</h1>
+        <a href="/admin/logout" class="btn btn-secondary">Lock Console</a>
     </div>
 
-    <!-- System Status Card -->
+    <!-- Stats -->
+    <div class="card" style="display: flex; gap: 20px; justify-content: space-between; flex-wrap: wrap;">
+        <div><strong>Current Season:</strong> {{ stats.current_season }}</div>
+        <div><strong>Total Season Hours:</strong> {{ "%.2f"|format(stats.total_hours) }}</div>
+        <div><strong>Students in Shop:</strong> {{ stats.total_people_in_shop }}</div>
+        <div><strong>Total Registered:</strong> {{ stats.total_users }}</div>
+    </div>
+
+    <!-- Users Roster & Management -->
     <div class="card">
-        <h3>📊 System Status</h3>
-        <p><strong>Total Hours Logged:</strong> [To be added]</p>
-        <p><strong>Active Members:</strong> [To be added]</p>
-        <p><strong>Current Season:</strong> [To be added]</p>
+        <h2>Roster Management</h2>
+        <table style="font-size: 0.95em;">
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Current PIN</th>
+                    <th>Status</th>
+                    <th>Hours</th>
+                    <th>State</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in leaderboard %}
+                <tr>
+                    <td><strong>{{ entry.username }}</strong></td>
+                    <td><code>{{ entry.pin }}</code></td>
+                    <td>{{ "Logged In" if entry.logged_in else "Away" }}</td>
+                    <td>{{ "%.2f"|format(entry.total_hours) }}</td>
+                    <td>{{ "Enabled" if entry.activated else "Disabled" }}</td>
+                    <td>
+                        <!-- Change PIN Form -->
+                        <form action="/admin/change_pin" method="POST" style="display: inline-block; margin-right: 5px;">
+                            <input type="hidden" name="username" value="{{ entry.username }}">
+                            <input type="hidden" name="old_pin" value="{{ entry.pin }}">
+                            <input type="text" name="new_pin" placeholder="New PIN" required style="width: 70px; padding: 4px; font-size: 0.9em; margin: 0;">
+                            <button type="submit" class="btn" style="padding: 4px 8px; font-size: 0.9em;">PIN</button>
+                        </form>
+
+                        <!-- Force logout -->
+                        {% if entry.logged_in %}
+                        <form action="/admin/delete_time" method="POST" style="display: inline-block; margin-right: 5px;">
+                            <input type="hidden" name="username" value="{{ entry.username }}">
+                            <input type="hidden" name="pin" value="{{ entry.pin }}">
+                            <button type="submit" class="btn btn-danger" style="padding: 4px 8px; font-size: 0.9em;">Force Out</button>
+                        </form>
+                        {% endif %}
+
+                        <!-- Enable/Disable -->
+                        <form action="/admin/toggle_user" method="POST" style="display: inline-block;">
+                            <input type="hidden" name="username" value="{{ entry.username }}">
+                            <input type="hidden" name="pin" value="{{ entry.pin }}">
+                            {% if entry.activated %}
+                                <input type="hidden" name="action" value="deactivate">
+                                <button type="submit" class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.9em;">Disable</button>
+                            {% else %}
+                                <input type="hidden" name="action" value="activate">
+                                <button type="submit" class="btn" style="padding: 4px 8px; font-size: 0.9em; background-color: #0088cc;">Enable</button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
-    <!-- Data Export Card -->
+    <!-- Season configuration & Export -->
     <div class="card">
-        <h3>💾 Data Management</h3>
-        <p>Export the leaderboard and hours data to a CSV file for records or analysis.</p>
-        <a href="/admin/export_csv">
-            <button style="width: 100%; margin-top: 1rem;">
-                📥 Download Leaderboard as CSV
-            </button>
-        </a>
+        <h2>System Configuration</h2>
+        <div style="display: flex; gap: 40px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 250px;">
+                <form action="/admin/change_season" method="POST">
+                    <label for="season_name"><strong>Change Season Name:</strong></label>
+                    <input type="text" id="season_name" name="season_name" placeholder="e.g. Build2026" required style="margin-top: 10px;">
+                    <input type="submit" value="Change Season">
+                </form>
+            </div>
+            <div style="flex: 1; min-width: 250px;">
+                <h3>Database Backup</h3>
+                <p>Export all active hours for the current season as a CSV spreadsheet:</p>
+                <a href="/admin/export_csv" class="btn">Download Leaderboard (CSV)</a>
+            </div>
+        </div>
     </div>
 
-    <!-- User Management Card -->
+    <!-- Raw Activity Logs -->
     <div class="card">
-        <h3>👥 User Management</h3>
-        <p>Tools for managing member accounts and access. (Expandable section)</p>
-        <ul style="margin-left: 1.5rem; margin-top: 1rem;">
-            <li>Activate / Deactivate members</li>
-            <li>Reset PINs</li>
-            <li>View detailed activity logs</li>
-        </ul>
+        <h2>Activity Logs</h2>
+        <div style="background-color: #000; color: #00ff00; padding: 15px; border-radius: 4px; max-height: 250px; overflow-y: scroll; font-family: monospace; font-size: 0.9em;">
+            {% for log in logs %}
+                <div>
+                    {{ log.timestamp }} | <strong>{{ log.username }}</strong> | PIN: {{ log.pin }} | 
+                    <span style="color: #fff;">{{ log.action }}</span> 
+                    {% if log.extra %}({{ log.extra }}){% endif %}
+                </div>
+            {% else %}
+                <div style="color: #888;">No logs found.</div>
+            {% endfor %}
+        </div>
     </div>
+{% endif %}
 
-    <!-- System Controls Card -->
-    <div class="card">
-        <h3>🔧 System Controls</h3>
-        <p>Advanced configuration options for system administrators.</p>
-        <ul style="margin-left: 1.5rem; margin-top: 1rem;">
-            <li>Change season</li>
-            <li>View activity logs</li>
-            <li>Configure backup settings</li>
-        </ul>
-    </div>
-
-    <!-- Danger Zone -->
-    <div class="card" style="border-left-color: #ff4444;">
-        <h3>⚠️ Danger Zone</h3>
-        <p style="color: #ff8888;">Only system administrators should use these tools.</p>
-        <p style="margin-top: 1rem; font-size: 0.9rem;">Advanced operations like database resets or bulk user modifications would go here.</p>
-    </div>
-
-    <div class="info" style="margin-top: 2rem;">
-        <p><strong>Tip:</strong> Keep regular backups of your data using the CSV export feature.</p>
-    </div>
 {% endblock %}

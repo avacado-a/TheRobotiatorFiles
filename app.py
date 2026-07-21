@@ -7,7 +7,7 @@ import os
 from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
-app.secret_key = "robotiators_secret_key_888"
+app.secret_key = "robot888"
 socketio = SocketIO(app, cors_allowed_origins="*")
 scheduler = APScheduler()
 
@@ -174,11 +174,11 @@ def registration():
 def admin():
     if request.method == 'POST':
         admin_pin = request.form.get('admin_pin', '').strip()
-        if admin_pin == "RobotiatorFiles888":
+        if admin_pin == "robot888":
             session['admin_logged_in'] = True
             return redirect(url_for('admin'))
         else:
-            return render_template('admin.html', error="Invalid Admin PIN")
+            return render_template('admin.html', error="Invalid Admin Password", needs_login=True)
 
     if not session.get('admin_logged_in', False):
         return render_template('admin.html', needs_login=True)

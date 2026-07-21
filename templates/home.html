@@ -1,61 +1,103 @@
 {% extends "base.html" %}
 
-{% block title %}Guide | Robotiator Files{% endblock %}
-
 {% block content %}
-    <h1>🤖 The Robotiator Files</h1>
-    <h2>Team 888 Workshop Attendance System</h2>
-
-    <div class="info">
-        <p>Welcome to the Robotiators Attendance System. Built to last with zero maintenance required.</p>
+    <h1>Robotiators Portal</h1>
+    
+    <div class="card" style="display: flex; gap: 20px; justify-content: space-around; flex-wrap: wrap;">
+        <div>
+            <strong>Current Season:</strong> <span id="stat-season">{{ stats.current_season }}</span>
+        </div>
+        <div>
+            <strong>Total Season Hours:</strong> <span id="stat-hours">{{ "%.2f"|format(stats.total_hours) }}</span>
+        </div>
+        <div>
+            <strong>Gerstner Hours:</strong> <span id="stat-gerstner">{{ "%.2f"|format(stats.gerstner_hours) }}</span>
+        </div>
+        <div>
+            <strong>Students in Shop:</strong> <span id="stat-people">{{ stats.total_people_in_shop }}</span>
+        </div>
     </div>
 
-    <div class="card">
-        <h3>🔑 How to Access</h3>
-        <ol style="margin-left: 1.5rem;">
-            <li>
-                <strong>Registration:</strong> Go to the <strong>Registration</strong> page. Enter your full name and create a PIN (4+ digits).
-            </li>
-            <li>
-                <strong>Logging:</strong> Visit the <strong>Logging</strong> page to log in/out using your PIN. Enter your PIN and submit to toggle your status.
-            </li>
-            <li>
-                <strong>Admin:</strong> Access administrative tools using the <strong>Admin</strong> page. Use PIN <code>RobotiatorFiles888</code> for system overrides.
-            </li>
-        </ol>
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+        <!-- Leaderboard -->
+        <div>
+            <h2>Leaderboard</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Hours</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    {% for entry in leaderboard %}
+                    {% if entry.activated %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ entry.username }}</td>
+                        <td>{{ "In Shop" if entry.logged_in else "Away" }}</td>
+                        <td>{{ "%.2f"|format(entry.total_hours) }}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Checked In List -->
+        <div>
+            <h2>Checked In Now</h2>
+            <ul id="active-list" style="list-style-type: square; padding-left: 20px;">
+                {% for user in stats.logged_in_users %}
+                <li>
+                    <strong>{{ user.username }}</strong> <span style="font-size: 0.85em; color: #888;">(In at {{ user.login_time.split(' ')[1] }})</span>
+                </li>
+                {% else %}
+                <li style="color: #888; list-style-type: none;">No one is checked in.</li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
 
-    <div class="card">
-        <h3>📊 Tracking Your Hours</h3>
-        <ul style="margin-left: 1.5rem;">
-            <li><strong>Leaderboard:</strong> See who has the most hours in the current season.</li>
-            <li><strong>Statistics:</strong> View total progress towards seasonal goals.</li>
-            <li><strong>Export:</strong> Download leaderboard data as CSV from the Admin page.</li>
-        </ul>
-    </div>
+    <script>
+        window.onStateUpdate.push(function(data) {
+            document.getElementById('stat-season').innerText = data.stats.current_season;
+            document.getElementById('stat-hours').innerText = parseFloat(data.stats.total_hours).toFixed(2);
+            document.getElementById('stat-gerstner').innerText = parseFloat(data.stats.gerstner_hours).toFixed(2);
+            document.getElementById('stat-people').innerText = data.stats.total_people_in_shop;
 
-    <div class="card">
-        <h3>🛡️ System Features</h3>
-        <ul style="margin-left: 1.5rem;">
-            <li><strong>Auto-Logout:</strong> Automatic logout at midnight with 30-minute cap from login time.</li>
-            <li><strong>Backups:</strong> Every event logged in database. Data easily exportable to CSV.</li>
-            <li><strong>Reliability:</strong> No maintenance required. Just log in and out!</li>
-        </ul>
-    </div>
+            // Update Leaderboard
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = '';
+            let idx = 0;
+            data.leaderboard.forEach(entry => {
+                if (!entry.activated) return;
+                idx++;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${idx}</td>
+                    <td>${entry.username}</td>
+                    <td>${entry.logged_in ? "In Shop" : "Away"}</td>
+                    <td>${parseFloat(entry.total_hours).toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
 
-    <div class="card">
-        <h3>🚀 Quick Start</h3>
-        <p>New member? Follow these steps:</p>
-        <ol style="margin-left: 1.5rem;">
-            <li>Click <strong>Registration</strong> button in the navbar</li>
-            <li>Enter your name and create a 4+ digit PIN</li>
-            <li>Click <strong>Logging</strong> to log in with your PIN</li>
-            <li>Click again to log out when you're done!</li>
-        </ol>
-    </div>
-
-    <div class="success" style="text-align: center; margin-top: 2rem;">
-        <p><strong>Ready to get started?</strong></p>
-        <p>Head to the <strong>Registration</strong> or <strong>Logging</strong> page using the navigation above.</p>
-    </div>
+            // Update Checked In List
+            const activeList = document.getElementById('active-list');
+            activeList.innerHTML = '';
+            if (data.stats.logged_in_users.length > 0) {
+                data.stats.logged_in_users.forEach(user => {
+                    const li = document.createElement('li');
+                    const timeOnly = user.login_time.split(' ')[1];
+                    li.innerHTML = `<strong>${user.username}</strong> <span style="font-size: 0.85em; color: #888;">(In at ${timeOnly})</span>`;
+                    activeList.appendChild(li);
+                });
+            } else {
+                activeList.innerHTML = '<li style="color: #888; list-style-type: none;">No one is checked in.</li>';
+            }
+        });
+    </script>
 {% endblock %}
