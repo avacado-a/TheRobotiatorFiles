@@ -1,37 +1,52 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Registration Page</title>
-    </head>
-    <body>
-    <div class="nav">
-        <a href="/logging"><button class="navbtn">Logging</button></a>
-        <a href="/registration"><button class="navbtn">Registration</button></a>
-        <a href="/admin"><button class="navbtn">Admin</button></a>
+{% extends "base.html" %}
+
+{% block title %}Registration | Robotiator Files{% endblock %}
+
+{% block content %}
+    <h1>📋 Registration</h1>
+
+    <div class="info">
+        <p>Create a new account to start logging your workshop hours.</p>
     </div>
-    <form method="post">
-        <h3>Enter Your Username</h3>
-        <input type="text" name="username" required>
-        <br><br>
-        <h3>Enter Your Pin</h3>
-        <input type="text" name="pin" required>
-        <br><br>
-        <input type="submit" value="Submit">
+
+    {% if message %}
+        <div class="success">{{ message }}</div>
+    {% endif %}
+
+    <form method="POST">
+        <label for="username"><h3>Full Name</h3></label>
+        <input 
+            type="text" 
+            id="username" 
+            name="username" 
+            placeholder="Enter your full name" 
+            required
+        >
+
+        <label for="pin"><h3>Create a PIN</h3></label>
+        <input 
+            type="text" 
+            id="pin" 
+            name="pin" 
+            placeholder="Enter a 4+ digit PIN (numbers only)" 
+            required
+        >
+
+        <input type="submit" value="Create Account">
     </form>
-</body>
-</html>
-<style>
-.navbtn {
-        position: relative;
-        width: 7%;
-        border-style: none;
-        border-radius: 5px;
-        background-color: red;
-        color: black;
-        height: 7%;
-        transition: width .5s;
-}
-.navbtn:hover {
-        width: 10%;
-}
-</style>
+
+    <div class="card">
+        <h3>🔐 PIN Requirements</h3>
+        <ul style="margin-left: 1.5rem;">
+            <li>Must be 4 or more digits</li>
+            <li>Must be unique (not used by another member)</li>
+            <li>Write it down somewhere safe!</li>
+            <li>You'll use this PIN to log in and out</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>✨ Next Steps</h3>
+        <p>After registration, head to the <strong>Logging</strong> page to start logging your hours!</p>
+    </div>
+{% endblock %}

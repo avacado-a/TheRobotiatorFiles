@@ -1,34 +1,37 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Logging Page</title>
-    </head>
-    <body>
-    <div class="nav">
-        <a href="/logging"><button class="navbtn">Logging</button></a>
-        <a href="/registration"><button class="navbtn">Registration</button></a>
-        <a href="/admin"><button class="navbtn">Admin</button></a>
+{% extends "base.html" %}
+
+{% block title %}Logging | Robotiator Files{% endblock %}
+
+{% block content %}
+    <h1>🚀 Logging</h1>
+
+    <div class="info">
+        <p>Enter your PIN to log in or out of the workshop.</p>
     </div>
-    <h3>Enter Your Pin</h3>
-    <form method="post">
-        <input type="text" name="pin" required>
-        <br><br>
-        <input type="submit" value="Submit">
+
+    {% if message %}
+        <div class="success">{{ message }}</div>
+    {% endif %}
+
+    <form method="POST">
+        <label for="pin"><h3>Your PIN</h3></label>
+        <input 
+            type="text" 
+            id="pin" 
+            name="pin" 
+            placeholder="Enter your 4+ digit PIN" 
+            required 
+            autofocus
+        >
+        <input type="submit" value="Log In / Out">
     </form>
-</body>
-</html>
-<style>
-.navbtn {
-        position: relative;
-        width: 7%;
-        border-style: none;
-        border-radius: 5px;
-        background-color: red;
-        color: black;
-        height: 7%;
-        transition: width .5s;
-}
-.navbtn:hover {
-        width: 10%;
-}
-</style>
+
+    <div class="card">
+        <h3>💡 Quick Tips</h3>
+        <ul style="margin-left: 1.5rem;">
+            <li>Enter your PIN and submit to toggle your login status</li>
+            <li>The system will automatically log you out at midnight</li>
+            <li>Visit <strong>Registration</strong> to create your account</li>
+        </ul>
+    </div>
+{% endblock %}

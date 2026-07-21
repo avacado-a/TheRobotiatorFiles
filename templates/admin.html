@@ -1,38 +1,63 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
 
-<html>      
-    <head>
-        <title>Admin Page</title>
-    </head>
-    <body>
-        <div class="nav">
-            <a href="/logging"><button class="navbtn">Logging</button></a>
-            <a href="/registration"><button class="navbtn">Registration</button></a>
-            <a href="/admin"><button class="navbtn">Admin</button></a>
-        </div>
+{% block title %}Admin | Robotiator Files{% endblock %}
 
+{% block content %}
+    <h1>⚙️ Admin Settings</h1>
 
-        <h2>Admin Settings</h2>
+    <div class="info">
+        <p>Administrative tools for managing the Robotiator Files system.</p>
+    </div>
 
+    <!-- System Status Card -->
+    <div class="card">
+        <h3>📊 System Status</h3>
+        <p><strong>Total Hours Logged:</strong> [To be added]</p>
+        <p><strong>Active Members:</strong> [To be added]</p>
+        <p><strong>Current Season:</strong> [To be added]</p>
+    </div>
 
-        <p>Here you can manage the administrative settings of the application.</p>
+    <!-- Data Export Card -->
+    <div class="card">
+        <h3>💾 Data Management</h3>
+        <p>Export the leaderboard and hours data to a CSV file for records or analysis.</p>
+        <a href="/admin/export_csv">
+            <button style="width: 100%; margin-top: 1rem;">
+                📥 Download Leaderboard as CSV
+            </button>
+        </a>
+    </div>
 
+    <!-- User Management Card -->
+    <div class="card">
+        <h3>👥 User Management</h3>
+        <p>Tools for managing member accounts and access. (Expandable section)</p>
+        <ul style="margin-left: 1.5rem; margin-top: 1rem;">
+            <li>Activate / Deactivate members</li>
+            <li>Reset PINs</li>
+            <li>View detailed activity logs</li>
+        </ul>
+    </div>
 
-        <a href="/admin/export_csv"><button>Export data to CSV</button></a>
-    </body>
-</html>
-<style>
-.navbtn {
-        position: relative;
-        width: 7%;
-        border-style: none;
-        border-radius: 5px;
-        background-color: red;
-        color: black;
-        height: 7%;
-        transition: width .5s;
-}
-.navbtn:hover {
-        width: 10%;
-}
-</style>
+    <!-- System Controls Card -->
+    <div class="card">
+        <h3>🔧 System Controls</h3>
+        <p>Advanced configuration options for system administrators.</p>
+        <ul style="margin-left: 1.5rem; margin-top: 1rem;">
+            <li>Change season</li>
+            <li>View activity logs</li>
+            <li>Configure backup settings</li>
+        </ul>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="card" style="border-left-color: #ff4444;">
+        <h3>⚠️ Danger Zone</h3>
+        <p style="color: #ff8888;">Only system administrators should use these tools.</p>
+        <p style="margin-top: 1rem; font-size: 0.9rem;">Advanced operations like database resets or bulk user modifications would go here.</p>
+    </div>
+
+    <div class="info" style="margin-top: 2rem;">
+        <p><strong>Tip:</strong> Keep regular backups of your data using the CSV export feature.</p>
+    </div>
+{% endblock %}

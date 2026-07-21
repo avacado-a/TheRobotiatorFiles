@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Guide | Robotiator Files{% endblock %}
+
+{% block content %}
+    <h1>🤖 The Robotiator Files</h1>
+    <h2>Team 888 Workshop Attendance System</h2>
+
+    <div class="info">
+        <p>Welcome to the Robotiators Attendance System. Built to last with zero maintenance required.</p>
+    </div>
+
+    <div class="card">
+        <h3>🔑 How to Access</h3>
+        <ol style="margin-left: 1.5rem;">
+            <li>
+                <strong>Registration:</strong> Go to the <strong>Registration</strong> page. Enter your full name and create a PIN (4+ digits).
+            </li>
+            <li>
+                <strong>Logging:</strong> Visit the <strong>Logging</strong> page to log in/out using your PIN. Enter your PIN and submit to toggle your status.
+            </li>
+            <li>
+                <strong>Admin:</strong> Access administrative tools using the <strong>Admin</strong> page. Use PIN <code>RobotiatorFiles888</code> for system overrides.
+            </li>
+        </ol>
+    </div>
+
+    <div class="card">
+        <h3>📊 Tracking Your Hours</h3>
+        <ul style="margin-left: 1.5rem;">
+            <li><strong>Leaderboard:</strong> See who has the most hours in the current season.</li>
+            <li><strong>Statistics:</strong> View total progress towards seasonal goals.</li>
+            <li><strong>Export:</strong> Download leaderboard data as CSV from the Admin page.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>🛡️ System Features</h3>
+        <ul style="margin-left: 1.5rem;">
+            <li><strong>Auto-Logout:</strong> Automatic logout at midnight with 30-minute cap from login time.</li>
+            <li><strong>Backups:</strong> Every event logged in database. Data easily exportable to CSV.</li>
+            <li><strong>Reliability:</strong> No maintenance required. Just log in and out!</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>🚀 Quick Start</h3>
+        <p>New member? Follow these steps:</p>
+        <ol style="margin-left: 1.5rem;">
+            <li>Click <strong>Registration</strong> button in the navbar</li>
+            <li>Enter your name and create a 4+ digit PIN</li>
+            <li>Click <strong>Logging</strong> to log in with your PIN</li>
+            <li>Click again to log out when you're done!</li>
+        </ol>
+    </div>
+
+    <div class="success" style="text-align: center; margin-top: 2rem;">
+        <p><strong>Ready to get started?</strong></p>
+        <p>Head to the <strong>Registration</strong> or <strong>Logging</strong> page using the navigation above.</p>
+    </div>
+{% endblock %}
