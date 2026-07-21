@@ -16,6 +16,8 @@ last_day = time.localtime().tm_mday
 leaderboard_data = []
 stats_data = {}
 
+db.init_db("2026Offseason")
+
 def scheduled_task():
     global last_day, leaderboard_data, stats_data
     try:

@@ -1,5 +1,9 @@
 import time
+import os
 
+def init_db(season: str):
+    if not os.path.exists("db.txt"):
+        change_season(season)
 
 def log_action(username: str, pin: int, action: str):
     with open("db.txt", "a") as f:
