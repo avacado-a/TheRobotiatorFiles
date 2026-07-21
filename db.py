@@ -5,26 +5,26 @@ def init_db(season: str):
     if not os.path.exists("db.txt"):
         change_season(season)
 
-def log_action(username: str, pin: int, action: str):
+def log_action(username: str, pin: str, action: str):
     with open("db.txt", "a") as f:
         f.write(time.strftime("%Y-%m-%d %H:%M:%S") + "|" + username + "|" + str(pin) + "|" + action + "\n")
 
-def create_user(username: str, pin: int):
+def create_user(username: str, pin: str):
     log_action(username, pin, "create")
 
-def login_user(username: str, pin: int):
+def login_user(username: str, pin: str):
     log_action(username, pin, "login")
 
-def logout_user(username: str, pin: int ):
+def logout_user(username: str, pin: str ):
     log_action(username, pin, "logout")
 
-def deactivate_user(username: str, pin: int):
+def deactivate_user(username: str, pin: str):
     log_action(username, pin, "deactivate")
 
-def activate_user(username: str, pin: int):
+def activate_user(username: str, pin: str):
     log_action(username, pin, "activate")
 
-def change_pin(username: str, old_pin: int, new_pin: int):
+def change_pin(username: str, old_pin: str, new_pin: str):
     with open("db.txt", "a") as f:
         f.write(time.strftime("%Y-%m-%d %H:%M:%S") + "|" + username + "|" + str(old_pin) + "|" + "change_pin" + "|" + str(new_pin) + "\n")
 
@@ -32,7 +32,7 @@ def change_season(season: str):
     with open("db.txt", "a") as f:
         f.write(time.strftime("%Y-%m-%d %H:%M:%S") + "|" + "system" + "|" + "-1" + "|" + "change_season" + "|" + season + "\n")
 
-def delete_time(username: str, pin: int):
+def delete_time(username: str, pin: str):
     with open("db.txt", "a") as f:
         f.write(time.strftime("%Y-%m-%d %H:%M:%S") + "|" + username + "|" + str(pin) + "|" + "delete_time" +"\n")
 
